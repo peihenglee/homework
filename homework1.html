@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4-8 homework1</title>
+    <script src="http://mockjs.com/dist/mock.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body>
+<h1>这里是返回结果</h1>
+    页码:<input type="number" id="page" value="1">
+    数量:<input type="number" id="num" value="3">
+    <button id="app">点击</button>
+    <pre id="result"></pre>
+
+<script>
+    $('#app').click(function(){
+        var num = $('#num').val()
+        var page = $('#page').val()
+        $.ajax({
+            url: 'http://api/yourdomain.com/getlist/',
+            type: 'get',
+            dataType: 'json',
+            data: {
+                num: num,
+                page: page
+            }
+        }).done(function(data, status, xhr){
+            $('#result').html(JSON.stringify(data, null, 2))
+        })
+    })
+
+    Mock.mock(/\/api\/yourdomain.com\/getlist/, function(options){
+        var page = getParams(options.url, 'page')
+        var num = getParams(options.url, 'num')
+        var output = {
+            status: 0,
+            ['data|'+num]: [
+                {
+                    "tid|+1" : 0,
+                    title: "@title",
+                    catalog: "index",
+                    fav: "@natural(0, 10000)",
+                    created: '@date("yyyy-MM-dd") @time()',
+                    isEnd: 0,
+                    answer: "@integer(0,100)",
+                    user: {
+                        avatar: "@image",
+                        name: "@cname",
+                        isVip: 1,
+                        level: "@integer(0,10)",
+                    }
+                }
+            ],
+            msg: '返回mock数据',
+        }
+        return Mock.mock(output)
+    });
+
+    /* eslint-disable no-unused-vars */
+    const getParams = (url, key) => {
+        //构造一个含有目标参数的正则表达式对象
+        let reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+        //匹配目标参数
+        let link = new URL(url)
+        let r = link.search.substr(1).match(reg);
+        //返回参数值
+        if (r != null) {
+            return decodeURI(r[2]);
+        }
+        return null;
+    }
+</script>
+</body>
+</html>
